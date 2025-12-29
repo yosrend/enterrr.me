@@ -1,0 +1,234 @@
+// enterrr.me - Prisma Database Schema
+// Updated with missing models for complete auth flow
+// Based on comprehensive project review analysis
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== USER & AUTHENTICATION =====
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  username        String    @unique
+  passwordHash    String
+  avatar          String?
+  bio             String?
+  emailVerified   Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  profiles            Profile[]
+  integrations        Integration[]
+  emailVerifications  EmailVerification[]
+  passwordResets      PasswordReset[]
+  refreshTokens       RefreshToken[]
+  
+  @@index([email, username])
+  @@map("users")
+}
+
+// NEW: Email Verification Model
+model EmailVerification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@index([token])
+  @@index([userId])
+  @@map("email_verifications")
+}
+
+// NEW: Password Reset Model
+model PasswordReset {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  expiresAt DateTime
+  used      Boolean   @default(false)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  
+  @@index([token])
+  @@index([userId])
+  @@map("password_resets")
+}
+
+// NEW: Refresh Token Storage (for JWT token revocation)
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@index([userId, expiresAt])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// ===== PROFILES & CONTENT =====
+
+model Profile {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug            String    @unique
+  title           String
+  description     String?
+  avatar          String?
+  bannerImage     String?
+  themeColor      String    @default("#3B82F6")
+  isPublic        Boolean   @default(true)
+  isDeleted       Boolean   @default(false)
+  publishedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  widgets         Widget[]
+  customDomain    CustomDomain?
+  analytics       Analytics[]
+  
+  @@index([userId, slug])
+  @@index([slug, isPublic])
+  @@map("profiles")
+}
+
+model Widget {
+  id              String    @id @default(cuid())
+  profileId       String
+  profile         Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  widgetType      String    // "link", "social", "image", "youtube", "section-title", etc.
+  size            String    @default("square") // "square", "rectangle", "portrait", "landscape", "full"
+  positionOrder   Int       // Order in the layout (0-indexed)
+  configJson      Json      // Widget-specific configuration (flexible schema)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  analytics       Analytics[]
+  
+  @@index([profileId, positionOrder])
+  @@index([profileId, widgetType])
+  @@map("widgets")
+}
+
+// ===== ANALYTICS =====
+
+model Analytics {
+  id              String    @id @default(cuid())
+  profileId       String
+  profile         Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  widgetId        String?
+  widget          Widget?   @relation(fields: [widgetId], references: [id], onDelete: SetNull)
+  eventType       String    // "page_view", "widget_click"
+  referrer        String?   // HTTP referrer
+  deviceType      String    // "mobile", "desktop", "tablet"
+  userAgent       String?
+  ipAddress       String?   // Note: Should be anonymized for GDPR
+  createdAt       DateTime  @default(now())
+  
+  @@index([profileId, createdAt])
+  @@index([widgetId, createdAt])
+  @@index([eventType, createdAt])
+  @@map("analytics")
+}
+
+// ===== CUSTOM DOMAINS =====
+
+model CustomDomain {
+  id                  String    @id @default(cuid())
+  profileId           String    @unique
+  profile             Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  domain              String    @unique
+  verificationToken   String?
+  isVerified          Boolean   @default(false)
+  verifiedAt          DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  @@index([domain])
+  @@map("custom_domains")
+}
+
+// ===== EXTERNAL INTEGRATIONS =====
+
+model Integration {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            String    // "spotify", "github", "google", etc.
+  oauthToken      String    // TODO: Should be encrypted at rest
+  refreshToken    String?   // TODO: Should be encrypted at rest
+  tokenExpiresAt  DateTime?
+  isActive        Boolean   @default(true)
+  metadata        Json?     // Platform-specific metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@unique([userId, type])
+  @@index([userId, type])
+  @@index([type])
+  @@map("integrations")
+}
+
+// ===== WIDGET TYPE EXAMPLES =====
+
+// Widget config examples (stored as JSON in Widget.configJson):
+
+// Link Button (WGT-001)
+// {
+//   "text": "Follow on Twitter",
+//   "url": "https://twitter.com/username",
+//   "icon": "twitter",
+//   "openNewTab": true,
+//   "backgroundColor": "#1DA1F2",
+//   "textColor": "#FFFFFF"
+// }
+
+// Social Media Link (WGT-002)
+// {
+//   "platform": "instagram",
+//   "handle": "@username",
+//   "displayName": "Follow me"
+// }
+
+// Image (WGT-004)
+// {
+//   "imageUrl": "https://cdn.cloudinary.com/...",
+//   "alt": "Portfolio screenshot",
+//   "linkUrl": "https://example.com",
+//   "borderRadius": 12,
+//   "objectFit": "cover"
+// }
+
+// YouTube Video (WGT-006)
+// {
+//   "videoId": "dQw4w9WgXcQ",
+//   "title": "My Latest Video",
+//   "showTitle": true,
+//   "autoplay": false
+// }
+
+// Section Title (WGT-008)
+// {
+//   "title": "My Projects",
+//   "fontSize": "lg",
+//   "fontWeight": 600,
+//   "showDivider": true,
+//   "dividerPosition": "both",
+//   "textColor": "#000000"
+// }
