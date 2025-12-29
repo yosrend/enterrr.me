@@ -1,142 +1,88 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { EditorState, Widget, WidgetType, ProfileSettings } from '../lib/types';
-import { generateId } from '../lib/utils';
+import type { EditorState, Widget, UserProfile } from '../lib/types';
+import { WidgetType, type WidgetSize } from '../lib/types';
 import { demoProfile, demoWidgets } from '../lib/mockData';
 
-// Helper function to create default widget
-function createDefaultWidget(type: WidgetType, order: number): Widget {
-    const id = generateId();
-    const base = { id, positionOrder: order };
+// Generate unique ID
+const generateId = () => Math.random().toString(36).substring(2, 11);
 
-    switch (type) {
-        case 'link-button':
-            return {
-                ...base,
-                type: 'link-button',
-                data: {
-                    text: 'New Link',
-                    url: 'https://example.com',
-                    backgroundColor: '#3B82F6',
-                    textColor: '#FFFFFF',
-                    borderRadius: 'md',
-                },
-            };
-        case 'social-media':
-            return {
-                ...base,
-                type: 'social-media',
-                data: {
-                    platform: 'twitter',
-                    handle: '@username',
-                    displayStyle: 'button',
-                },
-            };
-        case 'section-title':
-            return {
-                ...base,
-                type: 'section-title',
-                data: {
-                    title: 'Section Title',
-                    fontSize: 'md',
-                    alignment: 'left',
-                    showDivider: true,
-                },
-            };
-    }
+// Default widget factory
+function createDefaultWidget(type: WidgetType): Widget {
+    const id = generateId();
+    const defaults: Record<WidgetType, Partial<Widget>> = {
+        [WidgetType.LINK]: { size: '2x1', title: 'New Link', description: 'Add your URL' },
+        [WidgetType.SOCIAL]: { size: '1x1', title: 'Social' },
+        [WidgetType.IMAGE]: { size: '2x2', title: 'Image', content: '' },
+        [WidgetType.SPOTIFY]: { size: '2x1', title: 'Track', description: 'Artist' },
+        [WidgetType.SECTION]: { size: '4x1', title: 'Section' },
+        [WidgetType.TEXT]: { size: '2x2', title: 'Hello.', content: 'Write something here.' },
+    };
+
+    return {
+        id,
+        type,
+        size: defaults[type].size as WidgetSize,
+        ...defaults[type],
+    };
 }
 
 export const useEditorStore = create<EditorState>()(
     persist(
-        (set, get) => ({
+        (set) => ({
             widgets: [],
-            selectedWidgetId: null,
-            profile: {
-                name: 'Your Name',
-                bio: 'Tell the world about yourself',
-                slug: 'yourname',
-                themeColor: '#3B82F6',
-            },
-            previewMode: 'desktop',
+            editingWidgetId: null,
+            profile: demoProfile,
 
             addWidget: (type: WidgetType) => {
-                const widgets = get().widgets;
-                const newWidget = createDefaultWidget(type, widgets.length);
-                set({
-                    widgets: [...widgets, newWidget],
-                    selectedWidgetId: newWidget.id,
-                });
+                const newWidget = createDefaultWidget(type);
+                set((state) => ({
+                    widgets: [...state.widgets, newWidget],
+                }));
             },
 
             deleteWidget: (id: string) => {
-                set((state) => {
-                    const newWidgets = state.widgets.filter((w) => w.id !== id);
-                    // Update position orders
-                    newWidgets.forEach((w, i) => {
-                        w.positionOrder = i;
-                    });
-                    return {
-                        widgets: newWidgets,
-                        selectedWidgetId: state.selectedWidgetId === id ? null : state.selectedWidgetId,
-                    };
-                });
+                set((state) => ({
+                    widgets: state.widgets.filter((w) => w.id !== id),
+                    editingWidgetId: state.editingWidgetId === id ? null : state.editingWidgetId,
+                }));
             },
 
-            updateWidget: (id: string, data: any) => {
+            updateWidget: (id: string, updates: Partial<Widget>) => {
                 set((state) => ({
                     widgets: state.widgets.map((w) =>
-                        w.id === id ? { ...w, data: { ...w.data, ...data } } : w
+                        w.id === id ? { ...w, ...updates } : w
                     ),
                 }));
             },
 
-            moveWidget: (id: string, direction: 'up' | 'down') => {
-                const widgets = get().widgets;
-                const index = widgets.findIndex((w) => w.id === id);
-                if (index === -1) return;
-
-                const newIndex = direction === 'up' ? index - 1 : index + 1;
-                if (newIndex < 0 || newIndex >= widgets.length) return;
-
-                const newWidgets = [...widgets];
-                [newWidgets[index], newWidgets[newIndex]] = [newWidgets[newIndex], newWidgets[index]];
-
-                // Update position orders
-                newWidgets.forEach((w, i) => {
-                    w.positionOrder = i;
-                });
-
-                set({ widgets: newWidgets });
-            },
-
-            reorderWidgets: (newOrder: Widget[]) => {
-                // Update position orders
-                newOrder.forEach((w, i) => {
-                    w.positionOrder = i;
-                });
-                set({ widgets: newOrder });
-            },
-
-            selectWidget: (id: string | null) => {
-                set({ selectedWidgetId: id });
-            },
-
-            updateProfile: (data: Partial<ProfileSettings>) => {
+            resizeWidget: (id: string, size: WidgetSize) => {
                 set((state) => ({
-                    profile: { ...state.profile, ...data },
+                    widgets: state.widgets.map((w) =>
+                        w.id === id ? { ...w, size } : w
+                    ),
                 }));
             },
 
-            setPreviewMode: (mode: 'desktop' | 'mobile') => {
-                set({ previewMode: mode });
+            reorderWidgets: (newOrder: Widget[]) => {
+                set({ widgets: newOrder });
+            },
+
+            setEditingWidget: (id: string | null) => {
+                set({ editingWidgetId: id });
+            },
+
+            updateProfile: (data: Partial<UserProfile>) => {
+                set((state) => ({
+                    profile: { ...state.profile, ...data },
+                }));
             },
 
             resetToDemo: () => {
                 set({
                     widgets: demoWidgets,
                     profile: demoProfile,
-                    selectedWidgetId: null,
-                    previewMode: 'desktop',
+                    editingWidgetId: null,
                 });
             },
         }),

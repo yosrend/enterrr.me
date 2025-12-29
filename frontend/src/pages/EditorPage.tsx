@@ -1,108 +1,123 @@
-import { ArrowLeft, Eye, Settings } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { useEditorStore } from '../store/editorStore';
-import { WidgetPalette } from '../components/editor/WidgetPalette';
-import { CanvasArea } from '../components/editor/CanvasArea';
-import { PreviewPanel } from '../components/editor/PreviewPanel';
-import { LinkButtonForm } from '../components/widgets/LinkButton/LinkButtonForm';
-import { SocialMediaForm } from '../components/widgets/SocialMedia/SocialMediaForm';
-import { SectionTitleForm } from '../components/widgets/SectionTitle/SectionTitleForm';
-import { Button } from '../components/ui/Button';
+import { WidgetType } from '../lib/types';
+import { Navbar } from '../components/layout/Navbar';
+import { BentoGrid } from '../components/bento/BentoGrid';
+import { EditModal } from '../components/bento/EditModal';
+
+// Icons
+const PlusIcon = () => (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+    </svg>
+);
 
 export default function EditorPage() {
-    const { widgets, selectedWidgetId, updateWidget, selectWidget } = useEditorStore();
+    const {
+        widgets,
+        profile,
+        editingWidgetId,
+        addWidget,
+        deleteWidget,
+        resizeWidget,
+        reorderWidgets,
+        setEditingWidget,
+        resetToDemo,
+    } = useEditorStore();
 
-    const selectedWidget = widgets.find((w) => w.id === selectedWidgetId);
+    const editingWidget = widgets.find((w) => w.id === editingWidgetId);
+
+    const widgetTypes = [
+        { type: WidgetType.LINK, label: 'Link' },
+        { type: WidgetType.IMAGE, label: 'Image' },
+        { type: WidgetType.SOCIAL, label: 'Social' },
+        { type: WidgetType.SPOTIFY, label: 'Spotify' },
+        { type: WidgetType.SECTION, label: 'Section' },
+        { type: WidgetType.TEXT, label: 'Text' },
+    ];
 
     return (
-        <div className="h-screen flex flex-col bg-gray-50">
-            {/* Header */}
-            <header className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Link
-                            to="/"
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                            title="Back to home"
+        <>
+            <Navbar user={profile} />
+
+            <div className="min-h-screen bg-[#f7f7f7] pt-20 flex">
+                {/* Sidebar */}
+                <aside className="w-80 h-full fixed left-0 top-20 p-8 hidden lg:block overflow-y-auto">
+                    <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-8">
+                        Add Widgets
+                    </h2>
+
+                    <div className="grid grid-cols-1 gap-2.5">
+                        {widgetTypes.map(({ type, label }) => (
+                            <button
+                                key={type}
+                                onClick={() => addWidget(type)}
+                                className="px-5 py-3.5 bg-white border border-gray-100 rounded-[20px] text-sm font-bold text-gray-900 text-left hover:border-black transition-all flex items-center justify-between group shadow-sm"
+                            >
+                                <span>{label}</span>
+                                <span className="text-gray-300 group-hover:text-black">
+                                    <PlusIcon />
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="mt-8 pt-8 border-t border-gray-200">
+                        <button
+                            onClick={resetToDemo}
+                            className="w-full px-5 py-3.5 bg-gray-100 rounded-[20px] text-sm font-bold text-gray-600 hover:bg-gray-200 transition-all"
                         >
-                            <ArrowLeft className="w-5 h-5 text-gray-600" />
-                        </Link>
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900">enterrr.me Editor</h1>
-                            <p className="text-sm text-gray-500">Build your perfect link-in-bio page</p>
+                            Load Demo
+                        </button>
+                    </div>
+                </aside>
+
+                {/* Main Content */}
+                <main className="flex-1 lg:ml-80 p-8 md:p-16">
+                    <div className="max-w-[700px] mx-auto">
+                        <div className="flex items-center justify-between mb-12">
+                            <h1 className="text-3xl font-black font-display tracking-tighter uppercase">
+                                Editing @{profile.username}
+                            </h1>
+                            <button className="px-8 py-3 bg-black text-white rounded-[18px] font-bold text-sm tracking-widest active:scale-95 transition-all shadow-xl shadow-black/10">
+                                Publish
+                            </button>
                         </div>
-                    </div>
 
-                    <div className="flex gap-3">
-                        <Button variant="outline" size="md">
-                            <Settings className="w-4 h-4 mr-2" />
-                            Settings
-                        </Button>
-                        <Button variant="primary" size="md">
-                            <Eye className="w-4 h-4 mr-2" />
-                            Publish
-                        </Button>
-                    </div>
-                </div>
-            </header>
-
-            {/* 3-Column Layout */}
-            <div className="flex-1 flex overflow-hidden">
-                {/* Left: Widget Palette */}
-                <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0 overflow-hidden">
-                    <WidgetPalette />
-                </div>
-
-                {/* Middle: Canvas & Edit Form */}
-                <div className="flex-1 flex overflow-hidden">
-                    {/* Canvas */}
-                    <div className="flex-1 overflow-y-auto p-6">
-                        <CanvasArea />
-                    </div>
-
-                    {/* Edit Form Sidebar (when widget selected) */}
-                    {selectedWidget && (
-                        <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto flex-shrink-0">
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="font-semibold text-lg">Edit Widget</h3>
+                        {/* Bento Grid Container */}
+                        <div className="editor-container">
+                            {widgets.length === 0 ? (
+                                <div className="text-center py-20">
+                                    <h3 className="text-xl font-bold text-gray-400 mb-4">No widgets yet</h3>
+                                    <p className="text-gray-400 mb-6">Add widgets from the sidebar to get started</p>
                                     <button
-                                        onClick={() => selectWidget(null)}
-                                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-                                        title="Close"
+                                        onClick={() => addWidget(WidgetType.TEXT)}
+                                        className="px-8 py-3 bg-black text-white rounded-[18px] font-bold text-sm"
                                     >
-                                        ✕
+                                        Add Your First Widget
                                     </button>
                                 </div>
-
-                                {selectedWidget.type === 'link-button' && (
-                                    <LinkButtonForm
-                                        widget={selectedWidget}
-                                        onUpdate={(data) => updateWidget(selectedWidget.id, data)}
-                                    />
-                                )}
-                                {selectedWidget.type === 'social-media' && (
-                                    <SocialMediaForm
-                                        widget={selectedWidget}
-                                        onUpdate={(data) => updateWidget(selectedWidget.id, data)}
-                                    />
-                                )}
-                                {selectedWidget.type === 'section-title' && (
-                                    <SectionTitleForm
-                                        widget={selectedWidget}
-                                        onUpdate={(data) => updateWidget(selectedWidget.id, data)}
-                                    />
-                                )}
-                            </div>
+                            ) : (
+                                <BentoGrid
+                                    widgets={widgets}
+                                    isEditor
+                                    onReorder={reorderWidgets}
+                                    onDelete={deleteWidget}
+                                    onEdit={setEditingWidget}
+                                    onSizeChange={resizeWidget}
+                                />
+                            )}
                         </div>
-                    )}
-                </div>
-
-                {/* Right: Preview Panel */}
-                <div className="w-[450px] bg-gray-100 border-l border-gray-200 flex-shrink-0 overflow-hidden">
-                    <PreviewPanel />
-                </div>
+                    </div>
+                </main>
             </div>
-        </div>
+
+            {/* Edit Modal */}
+            <AnimatePresence>
+                {editingWidget && (
+                    <EditModal widget={editingWidget} onClose={() => setEditingWidget(null)} />
+                )}
+            </AnimatePresence>
+        </>
     );
 }

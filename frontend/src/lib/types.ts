@@ -1,76 +1,58 @@
-// Widget Types
-export type WidgetType = 'link-button' | 'social-media' | 'section-title';
+// Widget Size Types
+export type WidgetSize = '1x1' | '2x1' | '1x2' | '2x2' | '4x1';
 
-// Base Widget Interface
-export interface BaseWidget {
+// Widget Types (using const instead of enum for erasableSyntaxOnly)
+export const WidgetType = {
+    LINK: 'LINK',
+    SOCIAL: 'SOCIAL',
+    IMAGE: 'IMAGE',
+    SPOTIFY: 'SPOTIFY',
+    SECTION: 'SECTION',
+    TEXT: 'TEXT',
+} as const;
+
+export type WidgetType = (typeof WidgetType)[keyof typeof WidgetType];
+
+// Widget Interface
+export interface Widget {
     id: string;
     type: WidgetType;
-    positionOrder: number;
+    size: WidgetSize;
+    title?: string;
+    description?: string;
+    content?: string;
+    icon?: string;
+    backgroundColor?: string;
+    textColor?: string;
 }
 
-// Link Button Widget
-export interface LinkButtonWidget extends BaseWidget {
-    type: 'link-button';
-    data: {
-        text: string;
-        url: string;
-        icon?: string;
-        backgroundColor: string;
-        textColor: string;
-        borderRadius: 'none' | 'sm' | 'md' | 'lg' | 'full';
-    };
-}
-
-// Social Media Widget
-export type SocialPlatform = 'twitter' | 'instagram' | 'linkedin' | 'github' | 'youtube' | 'tiktok' | 'facebook';
-
-export interface SocialMediaWidget extends BaseWidget {
-    type: 'social-media';
-    data: {
-        platform: SocialPlatform;
-        handle: string;
-        displayStyle: 'icon' | 'button' | 'card';
-    };
-}
-
-// Section Title Widget
-export interface SectionTitleWidget extends BaseWidget {
-    type: 'section-title';
-    data: {
-        title: string;
-        fontSize: 'sm' | 'md' | 'lg';
-        alignment: 'left' | 'center' | 'right';
-        showDivider: boolean;
-    };
-}
-
-// Union type for all widgets
-export type Widget = LinkButtonWidget | SocialMediaWidget | SectionTitleWidget;
-
-// Profile Settings
-export interface ProfileSettings {
-    name: string;
+// User Profile Interface
+export interface UserProfile {
+    username: string;
+    displayName: string;
     bio: string;
-    slug: string;
-    avatar?: string;
-    themeColor: string;
+    avatar: string;
+    theme: {
+        primary: string;
+        background: string;
+        cardStyle: 'rounded' | 'sharp' | 'extra-rounded';
+    };
+    widgets: Widget[];
 }
 
 // Editor State
 export interface EditorState {
     widgets: Widget[];
-    selectedWidgetId: string | null;
-    profile: ProfileSettings;
-    previewMode: 'desktop' | 'mobile';
+    editingWidgetId: string | null;
+    profile: UserProfile;
 
     // Actions
     addWidget: (type: WidgetType) => void;
     deleteWidget: (id: string) => void;
-    updateWidget: (id: string, data: Partial<Widget['data']>) => void;
-    moveWidget: (id: string, direction: 'up' | 'down') => void;
+    updateWidget: (id: string, updates: Partial<Widget>) => void;
+    resizeWidget: (id: string, size: WidgetSize) => void;
     reorderWidgets: (newOrder: Widget[]) => void;
-    selectWidget: (id: string | null) => void;
-    updateProfile: (data: Partial<ProfileSettings>) => void;
-    setPreviewMode: (mode: 'desktop' | 'mobile') => void;
+    setEditingWidget: (id: string | null) => void;
+    updateProfile: (data: Partial<UserProfile>) => void;
     resetToDemo: () => void;
 }

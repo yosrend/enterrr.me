@@ -1,28 +1,63 @@
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Navbar } from '../components/layout/Navbar';
 
 export default function HomePage() {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-            <div className="text-center px-4">
-                <h1 className="text-6xl font-bold text-primary-600 mb-4">
-                    enterrr.me
-                </h1>
-                <p className="text-2xl text-gray-700 mb-2">
-                    The Beautiful, Free Bento.me Alternative
-                </p>
-                <p className="text-lg text-gray-600 mb-8">
-                    Create your perfect link-in-bio page with drag-and-drop simplicity
-                </p>
-                <Link
-                    to="/editor"
-                    className="inline-block bg-primary-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-primary-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                    Start Building →
-                </Link>
-                <div className="mt-12 text-sm text-gray-500">
-                    <p>✨ Free Forever • 🎨 Fully Customizable • 📱 Mobile Responsive</p>
+        <>
+            <Navbar />
+
+            <div className="min-h-screen pt-40 pb-20 px-6">
+                <div className="max-w-4xl mx-auto text-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="inline-block px-4 py-1.5 bg-gray-100 rounded-full text-[10px] font-black uppercase tracking-widest mb-10"
+                    >
+                        Claim your unique space
+                    </motion.div>
+
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-7xl md:text-[100px] font-extrabold font-display leading-[0.9] tracking-tighter mb-12"
+                    >
+                        The clean <br />
+                        <span className="text-gray-300">link-in-bio.</span>
+                    </motion.h1>
+
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-xl md:text-2xl text-gray-400 font-medium max-w-2xl mx-auto mb-16 leading-relaxed"
+                    >
+                        Curate your best work, profiles, and music in a beautiful bento grid.
+                        Minimal, professional, and entirely you.
+                    </motion.p>
+
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="flex flex-col md:flex-row items-center justify-center gap-4"
+                    >
+                        <Link
+                            to="/editor"
+                            className="px-10 py-5 bg-black text-white rounded-[24px] text-xl font-bold hover:scale-105 transition-transform active:scale-95 shadow-2xl shadow-black/10"
+                        >
+                            Start building for free
+                        </Link>
+                        <Link
+                            to="/p/alex"
+                            className="px-10 py-5 bg-white border border-gray-200 text-black rounded-[24px] text-xl font-bold hover:bg-gray-50 transition-colors"
+                        >
+                            View Example
+                        </Link>
+                    </motion.div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

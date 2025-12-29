@@ -1,89 +1,77 @@
-import type { Widget, ProfileSettings } from './types';
-import { generateId } from './utils';
+import type { Widget, UserProfile } from './types';
+import { WidgetType } from './types';
 
-export const demoProfile: ProfileSettings = {
-    name: 'Alex Johnson',
+export const demoProfile: UserProfile = {
+    username: 'alex',
+    displayName: 'Alex Rivera',
     bio: '👨‍💻 Full-stack developer | 🎨 UI/UX enthusiast | ☕ Coffee addict',
-    slug: 'alexjohnson',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
-    themeColor: '#3B82F6',
+    theme: {
+        primary: '#000000',
+        background: '#f7f7f7',
+        cardStyle: 'extra-rounded',
+    },
+    widgets: [],
 };
 
 export const demoWidgets: Widget[] = [
     {
-        id: generateId(),
-        type: 'section-title',
-        positionOrder: 0,
-        data: {
-            title: '🔗 Links',
-            fontSize: 'lg',
-            alignment: 'left',
-            showDivider: true,
-        },
+        id: 'w1',
+        type: WidgetType.TEXT,
+        size: '2x2',
+        title: 'Hello.',
+        content: 'I create tools that make design more accessible for everyone.',
     },
     {
-        id: generateId(),
-        type: 'link-button',
-        positionOrder: 1,
-        data: {
-            text: 'My Portfolio',
-            url: 'https://alexjohnson.com',
-            backgroundColor: '#3B82F6',
-            textColor: '#FFFFFF',
-            borderRadius: 'lg',
-        },
+        id: 'w2',
+        type: WidgetType.LINK,
+        size: '2x1',
+        title: 'My Portfolio',
+        description: 'Works from 2024',
     },
     {
-        id: generateId(),
-        type: 'link-button',
-        positionOrder: 2,
-        data: {
-            text: 'Latest Blog Post',
-            url: 'https://blog.alexjohnson.com',
-            backgroundColor: '#10B981',
-            textColor: '#FFFFFF',
-            borderRadius: 'lg',
-        },
+        id: 'w3',
+        type: WidgetType.SOCIAL,
+        size: '1x1',
+        title: 'Instagram',
     },
     {
-        id: generateId(),
-        type: 'section-title',
-        positionOrder: 3,
-        data: {
-            title: '📱 Social Media',
-            fontSize: 'lg',
-            alignment: 'left',
-            showDivider: true,
-        },
+        id: 'w4',
+        type: WidgetType.SOCIAL,
+        size: '1x1',
+        title: 'Twitter',
     },
     {
-        id: generateId(),
-        type: 'social-media',
-        positionOrder: 4,
-        data: {
-            platform: 'twitter',
-            handle: '@alexjohnson',
-            displayStyle: 'button',
-        },
+        id: 'w5',
+        type: WidgetType.SPOTIFY,
+        size: '2x1',
+        title: 'Night Mood',
+        description: 'Lo-fi study beats',
     },
     {
-        id: generateId(),
-        type: 'social-media',
-        positionOrder: 5,
-        data: {
-            platform: 'github',
-            handle: 'alexjohnson',
-            displayStyle: 'button',
-        },
+        id: 'w6',
+        type: WidgetType.IMAGE,
+        size: '2x2',
+        title: 'Abstract Art',
+        content: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800',
     },
     {
-        id: generateId(),
-        type: 'social-media',
-        positionOrder: 6,
-        data: {
-            platform: 'linkedin',
-            handle: 'alexjohnson',
-            displayStyle: 'button',
-        },
+        id: 'w7',
+        type: WidgetType.SECTION,
+        size: '4x1',
+        title: 'Archives',
+    },
+    {
+        id: 'w8',
+        type: WidgetType.LINK,
+        size: '1x1',
+        title: 'CV',
+    },
+    {
+        id: 'w9',
+        type: WidgetType.LINK,
+        size: '2x1',
+        title: 'Read my latest blog post',
+        description: '10 mins read',
     },
 ];
