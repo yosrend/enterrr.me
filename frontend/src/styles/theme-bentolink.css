@@ -1,0 +1,123 @@
+/* ===========================================
+   BENTO.LINK THEME - Original enterrr.me style
+   =========================================== */
+
+/* Theme Variables */
+:root {
+    /* Background */
+    --bl-bg-page: #f7f7f7;
+    --bl-bg-card: #ffffff;
+
+    /* Text Colors */
+    --bl-text-primary: #1a1a1a;
+    --bl-text-secondary: #6b7280;
+    --bl-text-muted: #9ca3af;
+
+    /* Border Radius - Extra rounded */
+    --bl-radius-sm: 16px;
+    --bl-radius-md: 24px;
+    --bl-radius-lg: 32px;
+    --bl-radius-xl: 40px;
+    --bl-radius-full: 9999px;
+
+    /* Spacing */
+    --bl-gap: 16px;
+    --bl-gap-mobile: 12px;
+
+    /* Grid */
+    --bl-grid-cols: 4;
+    --bl-grid-cols-mobile: 2;
+    --bl-row-height: 160px;
+    --bl-row-height-mobile: 140px;
+
+    /* Container */
+    --bl-container-max: 700px;
+}
+
+/* Page Background */
+.theme-bentolink {
+    background-color: var(--bl-bg-page);
+    min-height: 100vh;
+}
+
+/* Bento.link Grid Layout */
+.bentolink-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--bl-grid-cols), 1fr);
+    gap: var(--bl-gap);
+    grid-auto-rows: var(--bl-row-height);
+    grid-auto-flow: dense;
+}
+
+@media (max-width: 768px) {
+    .bentolink-grid {
+        grid-template-columns: repeat(var(--bl-grid-cols-mobile), 1fr);
+        gap: var(--bl-gap-mobile);
+        grid-auto-rows: var(--bl-row-height-mobile);
+    }
+}
+
+/* Widget Card - bento.link style */
+.bentolink-card {
+    background-color: var(--bl-bg-card);
+    border-radius: var(--bl-radius-lg);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.bentolink-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Widget Sizes */
+.bentolink-1x1 {
+    grid-column: span 1;
+    grid-row: span 1;
+}
+
+.bentolink-2x1 {
+    grid-column: span 2;
+    grid-row: span 1;
+}
+
+.bentolink-1x2 {
+    grid-column: span 1;
+    grid-row: span 2;
+}
+
+.bentolink-2x2 {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.bentolink-4x1 {
+    grid-column: span 4;
+    grid-row: span 1;
+}
+
+@media (max-width: 768px) {
+    .bentolink-4x1 {
+        grid-column: span 2;
+    }
+}
+
+/* Editor Container with Dashed Border */
+.bentolink-editor-container {
+    background: rgba(255, 255, 255, 0.4);
+    padding: 40px;
+    border: 4px dashed rgba(0, 0, 0, 0.1);
+    border-radius: 48px;
+}
+
+/* Profile Avatar */
+.bentolink-avatar {
+    width: 128px;
+    height: 128px;
+    border-radius: var(--bl-radius-lg);
+    border: 4px solid white;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    object-fit: cover;
+}

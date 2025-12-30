@@ -3,7 +3,11 @@
 /* Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap');
 
-/* Custom CSS */
+/* Theme Imports */
+@import "./styles/theme-bentome.css";
+@import "./styles/theme-bentolink.css";
+
+/* Base Styles */
 :root {
     --font-sans: 'Inter', system-ui, sans-serif;
     --font-display: 'Outfit', system-ui, sans-serif;
@@ -11,9 +15,24 @@
 
 body {
     font-family: var(--font-sans);
-    background-color: #f7f7f7;
-    color: #1a1a1a;
     -webkit-font-smoothing: antialiased;
+}
+
+/* Default to bento.me theme */
+body {
+    background-color: #ffffff;
+    color: #1a1a1a;
+}
+
+/* Theme switching via class */
+.theme-bentolink body,
+body.theme-bentolink {
+    background-color: #f7f7f7;
+}
+
+.theme-bentome body,
+body.theme-bentome {
+    background-color: #ffffff;
 }
 
 h1,
@@ -23,7 +42,7 @@ h3,
     font-family: var(--font-display);
 }
 
-/* Bento Grid */
+/* Legacy Bento Grid (kept for compatibility) */
 .bento-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -40,7 +59,7 @@ h3,
     }
 }
 
-/* Widget Size Classes */
+/* Legacy Widget Size Classes */
 .widget-1x1 {
     grid-column: span 1;
     grid-row: span 1;
@@ -83,7 +102,7 @@ h3,
     color: inherit;
 }
 
-/* Widget Card */
+/* Legacy Widget Card */
 .widget-card {
     @apply relative bg-white border border-gray-100 overflow-hidden transition-all duration-300 shadow-sm;
     border-radius: 32px;
@@ -94,7 +113,7 @@ h3,
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
 }
 
-/* Editor Container */
+/* Legacy Editor Container */
 .editor-container {
     @apply bg-white/40 p-10 border-4 border-dashed border-gray-200;
     border-radius: 48px;
